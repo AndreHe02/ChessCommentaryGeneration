@@ -10,6 +10,7 @@ import time
 from PyQt5 import QtGui, QtCore
 import functools
 import sys
+from PyQt5.QtWidgets import QApplication
 
 
 import argparse
@@ -44,7 +45,7 @@ class Render(QWebEnginePage):
 def save_all():
 	global cur_url
 	global html_doc
-	all_links = pickle.load( open("./saved_files/saved_links.p", "r") )
+	all_links = pickle.load( open("./saved_files/saved_links.p", "rb") )
 	#extra_links = pickle.load( open("extra_pages.p", "r") )
 	print("len(all_links) = ",len(all_links))
 	num = sys.argv[1]
@@ -61,20 +62,24 @@ def save_all():
 
 	cur_url = url
 	error_count = 0
-	try:
+	#try:
+	if True:
+		print('start')
 		r = Render(cur_url)
+		print('rendering')
 		result = r.frame.toHtml()
 		html_doc = result.toAscii()
-		
+		print('to ascii')	
 		if num==0:
-			fw = open("./saved_files/saved"+str(i)+".html", "w")
+			fw = open("./saved_files/saved"+str(i)+".html", "wb")
 		else:
-			fw = open("./saved_files/saved"+str(i)+"_" + str(num) + ".html", "w")
+			fw = open("./saved_files/saved"+str(i)+"_" + str(num) + ".html", "wb")
 		fw.write(html_doc)
 		fw.close()
 		print("---- SLEEPING ---- ")
 		time.sleep(10)
-	except:
+	#except:
+	else:
 		print("ERROR!!")
 		error_count+=1
 		print("error_count = ",error_count)
