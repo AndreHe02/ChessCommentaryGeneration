@@ -26,20 +26,20 @@ params = parseArguments()
 
 #Take this class for granted.Just use result of rendering.
 class Render(QWebEnginePage):  
-  def __init__(self, url):  
-	self.app = QApplication(sys.argv)
-	QWebEnginePage.__init__(self)  
-	self.loadFinished.connect(self._loadFinished)  
-	qurl = QUrl(url)
-	func = functools.partial(self.mainFrame().load, qurl )  
-	timer = QtCore.QTimer()
-	timer.timeout.connect(func)
-	timer.start(10000)
-	self.app.exec_()  
-  
-  def _loadFinished(self, result):  
-	self.frame = self.mainFrame()  
-	self.app.quit()  
+	def __init__(self, url):  
+		self.app = QApplication(sys.argv)
+		QWebEnginePage.__init__(self)  
+		self.loadFinished.connect(self._loadFinished)  
+		qurl = QUrl(url)
+		func = functools.partial(self.mainFrame().load, qurl )  
+		timer = QtCore.QTimer()
+		timer.timeout.connect(func)
+		timer.start(10000)
+		self.app.exec_()  
+
+	def _loadFinished(self, result):  
+		self.frame = self.mainFrame()  
+		self.app.quit()  
 
 def save_all():
 	global cur_url
@@ -58,7 +58,7 @@ def save_all():
 	print("i, url = ",i,url)
 	#This step is important.Converting QString to Ascii for lxml to process
 	#archive_links = html.fromstring(str(result.toAscii()))
-	
+
 	cur_url = url
 	error_count = 0
 	try:
