@@ -3,7 +3,7 @@ import sys
 from PyQt5.QtGui import *  
 from PyQt5.QtCore import *  
 #from PyQt5.QtWebKit import *  
-from PyQt5.QtWebEngineWidgets import QWebEnginePage
+from PyQt5.QtWebEngineWidgets import QWebEnginePage, QWebEngineView
 from lxml import html 
 import pickle
 import time
@@ -11,7 +11,7 @@ from PyQt5 import QtGui, QtCore
 import functools
 import sys
 from PyQt5.QtWidgets import QApplication
-
+#from PyQt5.QtWebKitWidgets import QWebView
 
 import argparse
 def parseArguments():
@@ -42,6 +42,37 @@ class Render(QWebEnginePage):
 		self.frame = self.mainFrame()  
 		self.app.quit()  
 
+
+class Browser(QWebEngineView):
+    def __init__(self, i, num):
+        QWebEngineView.__init__(self)
+        self.loadFinished.connect(self._result_available)
+        self.i = i
+        self.num = num
+
+    def _result_available(self, ok):
+        if ok:
+            frame = self.page()
+            frame.toHtml(self.callback)
+
+    def callback(self, html):
+        i = self.i	
+        num = self.num
+        print(unicode(html).encode('utf-8'))
+        html_doc = html.toAscii()
+        print('to ascii')	
+        if num==0:
+                fw = open("./saved_files/saved"+str(i)+".html", "wb")
+        else:
+                fw = open("./saved_files/saved"+str(i)+"_" + str(num) + ".html", "wb")
+        fw.write(html_doc)
+        fw.close()
+        print("---- SLEEPING ---- ")
+        time.sleep(10)
+        sys.exit(app.exec_())
+
+
+
 def save_all():
 	global cur_url
 	global html_doc
@@ -65,19 +96,12 @@ def save_all():
 	#try:
 	if True:
 		print('start')
-		r = Render(cur_url)
-		print('rendering')
-		result = r.frame.toHtml()
-		html_doc = result.toAscii()
-		print('to ascii')	
-		if num==0:
-			fw = open("./saved_files/saved"+str(i)+".html", "wb")
-		else:
-			fw = open("./saved_files/saved"+str(i)+"_" + str(num) + ".html", "wb")
-		fw.write(html_doc)
-		fw.close()
-		print("---- SLEEPING ---- ")
-		time.sleep(10)
+		#r = Render(cur_url)
+		#print('rendering')
+		#result = r.frame.toHtml()
+		app = QApplication(sys.argv)
+		b = Browser(i, num)
+		b.load(QUrl(cur_url))
 	#except:
 	else:
 		print("ERROR!!")

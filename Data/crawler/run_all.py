@@ -21,7 +21,7 @@ for i, link in enumerate(all_links):
 	print("i,num: ",i,num) # 0 is no extra, if extra then (num-1) extra pages
 	for j in range(0,num): # j=0 is the home page. Begin range from 0 if home page is to be included.
 		print(j)
-		processes.add( subprocess.Popen(["python", "save_rendered_webpage.py", "-i", str(i), "-num", str(j) ]) )
+		processes.add( subprocess.Popen(["xvfb-run", "-a", "python", "save_rendered_webpage.py", "-i", str(i), "-num", str(j) ]) )
 		if len(processes) >= max_processes:
 			print("=========== Waiting")
 			os.wait()
