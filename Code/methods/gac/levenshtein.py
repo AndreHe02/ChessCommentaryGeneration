@@ -31,4 +31,4 @@ def levenshtein(a,b):
 
 if __name__=="__main__":
     from sys import argv
-    print levenshtein(argv[1],argv[2])
+    print(levenshtein(argv[1],argv[2]))

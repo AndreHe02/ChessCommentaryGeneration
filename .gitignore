@@ -1,1 +1,7 @@
 *.DS_Store
+**/saved_files
+**/outputs
+**/__pycache__
+**/error_files.txt
+*.bak
+
