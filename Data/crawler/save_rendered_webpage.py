@@ -3,73 +3,60 @@ import sys
 from PyQt5.QtGui import *  
 from PyQt5.QtCore import *  
 #from PyQt5.QtWebKit import *  
-from PyQt5.QtWebEngineWidgets import QWebEnginePage, QWebEngineView
+# from PyQt5.QtWebEngineWidgets import QWebEnginePage, QWebEngineView
 from lxml import html 
 import pickle
 import time
 from PyQt5 import QtGui, QtCore
 import functools
 import sys
-from PyQt5.QtWidgets import QApplication
+# from PyQt5.QtWidgets import QApplication
+from PyQt5.QtWidgets import *
+from PyQt5.QtWebEngineWidgets import *
+
 #from PyQt5.QtWebKitWidgets import QWebView
 
 import argparse
 def parseArguments():
-    parser = argparse.ArgumentParser()
-    #parser.add_argument("-typ", dest="typ", help="home or subsequent", default='home')
-    parser.add_argument("-i", type=int, dest="i", help="i")
-    parser.add_argument("-num", type=int, dest="num", help="num")
-    args = parser.parse_args()  
-    return args
+	parser = argparse.ArgumentParser()
+	#parser.add_argument("-typ", dest="typ", help="home or subsequent", default='home')
+	parser.add_argument("-i", type=int, dest="i", help="i")
+	parser.add_argument("-num", type=int, dest="num", help="num")
+	args = parser.parse_args()  
+	return args
 params = parseArguments()
 #typ = params.typ
 
+class MainWindow(QMainWindow):
+	def __init__(self, url, i, num):
+		super(MainWindow, self).__init__()
+		self.browser = QWebEngineView()
+		self.browser.load(QUrl(url))
+		self.browser.loadFinished.connect(self.test)
+		self.setCentralWidget(self.browser)
+		self.showMaximized()
+		self.i = i
+		self.num = num
 
-#Take this class for granted.Just use result of rendering.
-class Render(QWebEnginePage):  
-	def __init__(self, url):  
-		self.app = QApplication(sys.argv)
-		QWebEnginePage.__init__(self)  
-		self.loadFinished.connect(self._loadFinished)  
-		qurl = QUrl(url)
-		func = functools.partial(self.mainFrame().load, qurl )  
-		timer = QtCore.QTimer()
-		timer.timeout.connect(func)
-		timer.start(10000)
-		self.app.exec_()  
+	def test(self):
+		print('super')
+		frame = self.browser.page()
+		frame.toHtml(self.callback)
 
-	def _loadFinished(self, result):  
-		self.frame = self.mainFrame()  
-		self.app.quit()  
-
-
-class Browser(QWebEngineView):
-    def __init__(self, i, num):
-        QWebEngineView.__init__(self)
-        self.loadFinished.connect(self._result_available)
-        self.i = i
-        self.num = num
-
-    def _result_available(self, ok):
-        if ok:
-            frame = self.page()
-            frame.toHtml(self.callback)
-
-    def callback(self, html):
-        i = self.i	
-        num = self.num
-        print(unicode(html).encode('utf-8'))
-        html_doc = html.toAscii()
-        print('to ascii')	
-        if num==0:
-                fw = open("./saved_files/saved"+str(i)+".html", "wb")
-        else:
-                fw = open("./saved_files/saved"+str(i)+"_" + str(num) + ".html", "wb")
-        fw.write(html_doc)
-        fw.close()
-        print("---- SLEEPING ---- ")
-        time.sleep(10)
-        sys.exit(app.exec_())
+	def callback(self, html):
+		i = self.i	
+		num = self.num
+		# print(unicode(html).encode('utf-8'))
+		# html_doc = html.toAscii()
+		html_doc = html
+		print('to ascii')	
+		if num==0:
+			fw = open("./saved_files/saved"+str(i)+".html", "w")
+		else:
+			fw = open("./saved_files/saved"+str(i)+"_" + str(num) + ".html", "w")
+		fw.write(html_doc)
+		fw.close()
+		self.close()
 
 
 
@@ -94,24 +81,13 @@ def save_all():
 	cur_url = url
 	error_count = 0
 	#try:
-	if True:
-		print('start')
-		#r = Render(cur_url)
-		#print('rendering')
-		#result = r.frame.toHtml()
-		app = QApplication(sys.argv)
-		b = Browser(i, num)
-		b.load(QUrl(cur_url))
-	#except:
-	else:
-		print("ERROR!!")
-		error_count+=1
-		print("error_count = ",error_count)
-	##if i>4:
-	##	break
+	app = QApplication(sys.argv)
+	QApplication.setApplicationName('crawler')
+	window = MainWindow(cur_url, i, num)
+	app.exec_()
 
 if __name__=="__main__":
-	save_all()
+	save_all()	
 
 '''
 s = "https://gameknot.com/annotation.pl/fierce-queen-taking-spanish-easy?gm=63368"

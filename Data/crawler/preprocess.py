@@ -83,9 +83,9 @@ outFileSingleEn=open("./saved_files/"+sys.argv[1]+".che-eng.single.en","w")
 
 outFileMultiCheStrings,outFileMultiEnStrings,outFileSingleCheStrings,outFileSingleEnStrings=[],[],[],[]
 
-print all_links[0]
+print(all_links[0])
 
-extra_links=pickle.load(open("extra_pages.p","r"))
+extra_links=pickle.load(open("extra_pages.p","rb"))
 
 moreThanOneLong=0
 total=0
@@ -121,11 +121,11 @@ for i,link in all_links:
             pageObjName="./outputs/saved"+str(i)+".obj"
         else:
             pageObjName="./outputs/saved"+str(i)+"_"+str(pageNo)+".obj"
-        print pageObjName
+        print(pageObjName)
         data=None
         try:
             #This is one page
-            data=pickle.load(open(pageObjName,"r"))
+            data=pickle.load(open(pageObjName,"rb"))
             totalMoves+=len(data)
         except:
             break
@@ -133,18 +133,20 @@ for i,link in all_links:
         for elem in data:
             moves=elem[0]
             board=elem[1]
-            comment=elem[2].encode('ascii','replace').strip()
+            # print(elem[2].strip())
+            # comment=elem[2].encode('ascii','replace').strip()
+            comment = elem[2].strip()
             commentWords=" ".join(word_tokenize(comment))
             currentStateString=" ".join([x['piece'] if 'piece' in x else 'eps' for x in elem[1]])
             startStateString=" ".join([x['piece'] if 'piece' in x else 'eps' for x in startState[1]])
             diffStateString=diffString(startState[1],elem[1])
-            print "Comment:",commentWords
-            print "Start State:\n"+startStateString
-            print "Moves:",moves
+            print("Comment:",commentWords)
+            print("Start State:\n"+startStateString)
+            print("Moves:",moves)
             moveSequence=parseMoveString(moves)
-            print "Parsed Moves:",moveSequence
-            print "Current State:\n"+currentStateString
-            print "Diff State:\n"+diffStateString
+            print("Parsed Moves:",moveSequence)
+            print("Current State:\n"+currentStateString)
+            print("Diff State:\n"+diffStateString)
             srcString=currentStateString+" <EOC> "+startStateString+" <EOP> "+" ".join(moveSequence)+" <EOMH>"
             tgtString=commentWords
             if len(moveSequence)==1:

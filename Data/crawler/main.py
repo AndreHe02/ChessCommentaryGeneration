@@ -5,6 +5,7 @@ import unicodedata
 import pickle
 import sys
 import time
+from tqdm import tqdm 
 
 from utilities import Utilities
 
@@ -25,19 +26,19 @@ def expander_main():
 	data_path = "./saved_files/"
 	src = data_path + "saved_links.p"
 	destination_path = data_path + "expanded_links.p"
-	saved_links = pickle.load( open(src,"r") )
+	saved_links = pickle.load( open(src,"rb") )
 	counts = []
 	for i, link in enumerate(saved_links):
-		print "i,link = ",i, link
+		print("i,link = ",i, link)
 		num = 0
 		#if i<2: continue
 		#if i>3: break
 		try:
 			file = "saved"+str(i)+".html"
-			html_doc = open(data_path + file,"r").read()
+			html_doc = open(data_path + file,"rb").read()
 			soup = utils.getSoupFromHTML(html_doc)
 			paginator = utils.getTableOfClass(soup, 'paginator')
-			print "len(paginator) = ",len(paginator)
+			print("len(paginator) = ",len(paginator))
 			if len(paginator)>0:
 				paginator = paginator[0] # If it occurs, it occurs twice - and both seem to be identical
 				txt = utils.soupToText(paginator).lower()
@@ -48,12 +49,12 @@ def expander_main():
 							num+=1
 						else:
 							break
-			print "num = ",num
+			print("num = ",num)
 		except:
-			print "----ERROR:"
+			print("----ERROR:")
 		counts.append(num)
-	print "len(counts) = ",len(counts)
-	print "sum(counts) = ",sum(counts)
+	print("len(counts) = ",len(counts))
+	print("sum(counts) = ",sum(counts))
 	pickle.dump(counts, open("extra_pages.p","w"))
 			
 
@@ -68,7 +69,7 @@ class DataCollector:
 		self._utils = Utilities()
 		self._data_path = "./saved_files/"
 		self._destination_path = "./outputs/"
-		print "------"
+		print("------")
 
 	def _getList(self):
 		#files = open(self._data_path)
@@ -152,13 +153,14 @@ class DataCollector:
 	def getData(self):
 		all_files = self._getList()
 		fw = open("error_files.txt","w")
-		for file in all_files:
+		for file in tqdm(all_files):
 			try:
-				print "file = ",file
-				html_doc = open(self._data_path + file,"r").read()
+				print("file = ",file)
+				html_doc = open(self._data_path + file,"rb").read()
 				soup = self._utils.getSoupFromHTML(html_doc)
 				results = soup.findAll("table",{"class":"dialog"})
 				tmp = results[0] # expecting only 1 table of this type
+				
 				results2 = tmp.findAll("tr")
 				results2 = [ result for result in results2 if len(result.findAll("td", recursive=False))==2 and len(self._utils.getDivOfClass(result, "cdiag_frame"))>0 ] #based on observation
 				all_steps_info = []
@@ -169,8 +171,11 @@ class DataCollector:
 					td_res = result.findAll("td", recursive=False)
 					td = td_res[0] ## move+board
 					##--- Extract moves
+					# print('td:', td)
 					txt =  td.get_text()
-					txt = unicodedata.normalize('NFKD', txt).encode('ascii','ignore')
+					# print(txt)
+					# txt = unicodedata.normalize('NFKD', txt).encode('ascii','ignore')
+					# print('txt:', txt)
 					moves = txt[:txt.find("<!--")].strip()
 					##--- Extract board elements
 					board_element_vals = self._getBoardValues(result)
@@ -182,8 +187,14 @@ class DataCollector:
 					comment = self._utils.soupToText(td)
 					##--- Add to data structure
 					current_step_info = [moves, board_element_info, comment]
+					# print('==========MOVES==========')
+					# print(moves)
+					# print('==========BOARD==========')
+					# print(board_element_info)
+					# print('==========COMMENT==========')
+					# print(comment)
 					all_steps_info.append(current_step_info)
-				pickle.dump( all_steps_info, open(self._destination_path + file.replace(".html",".obj"), "w") )
+				pickle.dump( all_steps_info, open(self._destination_path + file.replace(".html",".obj"), "wb") )
 			except:
 				fw.write(file)
 				fw.write("\n")
@@ -198,4 +209,4 @@ if mode=="html_parser":
 elif mode=="expand":
 	expander_main()
 else:
-	print "Wrong option"
+	print("Wrong option")
